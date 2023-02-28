@@ -1,5 +1,5 @@
 asgi-redis>=1.4.3
-asgiref==1.1.2
+asgiref>=3.5.0
 async-timeout==4.0.2
 attrs==22.2.0
 autobahn==23.1.2
