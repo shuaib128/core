@@ -1,15 +1,39 @@
+version: '1'
+name: django-channels-railway
+
 env:
-  - SECRET_KEY=some_secret_key
+  - WEB_CONCURRENCY=1
+  - DJANGO_SETTINGS_MODULE=core.settings
+  - PYTHONUNBUFFERED=1
+  - REDISHOST=containers-us-west-92.railway.app
+  - REDISPASSWORD=IBVhmzoCOZVoDLaOSul9
+  - REDISPORT=5903
+  - REDISUSER=default
+
+build:
+  dockerfile: Dockerfile
+  context: .
+
 services:
-  web:
-    image: python:3.9
-    command: python manage.py migrate && python manage.py runworker && daphne core.asgi:application --port $PORT --bind 0.0.0.0 -v2
+  app:
+    command: daphne core.asgi:application -b 0.0.0.0 -p ${{PORT}}
+    port: ${{PORT}}
     env:
-      DJANGO_SETTINGS_MODULE: 'core.settings'
-      REDIS_URL: 'redis://default:IBVhmzoCOZVoDLaOSul9@containers-us-west-92.railway.app:5903'
-      SECRET_KEY: ${{SECRET_KEY}}
-    ports:
-      - ${{PORT}}:8000
-    dependencies:
-      - redis
-      - postgresql
+      REDIS_URL: redis://${{REDISUSER}}:${{REDISPASSWORD}}@${{REDISHOST}}:${{REDISPORT}}
+    # Optional: add healthchecks to ensure the app is running properly
+    # healthcheck:
+    #   exec:
+    #     cmd: curl -f http://localhost:${{PORT}}/
+
+  worker:
+    command: python manage.py runworker -v 2
+    env:
+      DJANGO_SETTINGS_MODULE: core.settings
+      REDIS_URL: redis://${{REDISUSER}}:${{REDISPASSWORD}}@${{REDISHOST}}:${{REDISPORT}}
+
+addons:
+  postgresql: latest
+
+databases:
+  default:
+    url: postgres://${{POSTGRESQL_ADDON_USER}}:${{POSTGRESQL_ADDON_PASSWORD}}@${{POSTGRESQL_ADDON_HOST}}:${{POSTGRESQL_ADDON_PORT}}/${{POSTGRESQL_ADDON_DB}}
