@@ -1,4 +1,4 @@
-asgi-redis>=1.5.0
+asgi-redis>=1.4.3
 asgiref==1.1.2
 async-timeout==4.0.2
 attrs==22.2.0
