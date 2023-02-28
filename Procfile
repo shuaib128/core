@@ -1,1 +1,1 @@
-web: daphne -p 8001 core.asgi:application
+web: daphne core.asgi:application
