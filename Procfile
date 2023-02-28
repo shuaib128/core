@@ -1,1 +1,1 @@
-web: daphne core.asgi:application --port 8000 --bind 0.0.0.0 -v2
+web: daphne -p 8001 core.asgi:application
