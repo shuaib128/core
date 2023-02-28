@@ -1,11 +1,15 @@
+env:
+  - SECRET_KEY=some_secret_key
 services:
   web:
-    build: .
+    image: python:3.9
+    command: python manage.py migrate && python manage.py runworker && daphne core.asgi:application --port $PORT --bind 0.0.0.0 -v2
     env:
-      DJANGO_SETTINGS_MODULE: core.settings
-      PORT: ${{ PORT }}
-      REDIS_URL: redis://default:IBVhmzoCOZVoDLaOSul9@containers-us-west-92.railway.app:5903
-
-  redis:
-    image: redis
-    command: redis-server --requirepass IBVhmzoCOZVoDLaOSul9
+      DJANGO_SETTINGS_MODULE: 'core.settings'
+      REDIS_URL: 'redis://default:IBVhmzoCOZVoDLaOSul9@containers-us-west-92.railway.app:5903'
+      SECRET_KEY: ${{SECRET_KEY}}
+    ports:
+      - ${{PORT}}:8000
+    dependencies:
+      - redis
+      - postgresql
