@@ -70,10 +70,18 @@ TEMPLATES = [
 WSGI_APPLICATION = 'core.wsgi.application'
 # Daphne
 ASGI_APPLICATION = "core.asgi.application"
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels.layers.InMemoryChannelLayer"
+#     }
+# }
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-    }
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [os.environ.get("REDIS_URL", "redis://default:IBVhmzoCOZVoDLaOSul9@containers-us-west-92.railway.app:5903")],
+        },
+    },
 }
 
 

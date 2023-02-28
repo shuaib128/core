@@ -1,0 +1,11 @@
+services:
+  web:
+    build: .
+    env:
+      DJANGO_SETTINGS_MODULE: core.settings
+      PORT: ${{ PORT }}
+      REDIS_URL: redis://default:IBVhmzoCOZVoDLaOSul9@containers-us-west-92.railway.app:5903
+
+  redis:
+    image: redis
+    command: redis-server --requirepass IBVhmzoCOZVoDLaOSul9
