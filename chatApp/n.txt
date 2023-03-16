@@ -1,0 +1,68 @@
+# consumers.py
+from channels.generic.websocket import AsyncWebsocketConsumer
+import json
+from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+from rest_framework_simplejwt.tokens import AccessToken
+
+class ChatConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        try:
+            user1_token = AccessToken(self.scope['user1_token'])
+            user2_token = AccessToken(self.scope['user2_token'])
+        except (InvalidToken, TokenError) as e:
+            await self.close()
+            return
+
+        self.user1 = await self.authenticate_user(user1_token)
+        self.user2 = await self.authenticate_user(user2_token)
+
+        self.chat_group_name = f'chat_{self.user1.id}_{self.user2.id}'
+
+        # Verify that both users have permission to access this chat room
+        if not self.user1.has_perm('chatroom.view_chatroom') or not self.user2.has_perm('chatroom.view_chatroom'):
+            await self.close()
+            return
+
+        # Join chat group
+        await self.channel_layer.group_add(
+            self.chat_group_name,
+            self.channel_name
+        )
+
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        # Leave chat group
+        await self.channel_layer.group_discard(
+            self.chat_group_name,
+            self.channel_name
+        )
+
+    async def receive(self, text_data):
+        data = json.loads(text_data)
+        message = data['message']
+
+        # Send message to chat group
+        await self.channel_layer.group_send(
+            self.chat_group_name,
+            {
+                'type': 'chat_message',
+                'message': message
+            }
+        )
+
+    async def chat_message(self, event):
+        message = event['message']
+
+        # Send message to WebSocket
+        await self.send(text_data=json.dumps({
+            'message': message
+        }))
+
+    async def authenticate_user(self, token):
+        user_id = token['user_id']
+        user = await get_user_model().objects.filter(pk=user_id).first()
+        if user is None:
+            raise Exception(f"User with id {user_id} does not exist")
+        return user
