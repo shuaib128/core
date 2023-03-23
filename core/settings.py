@@ -39,8 +39,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     #Apps
-    'chatApp',
-    'users'
+    'chatApp.apps.ChatappConfig',
+    'users.apps.UsersConfig'
 ]
 
 MIDDLEWARE = [
