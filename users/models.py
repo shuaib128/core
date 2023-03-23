@@ -11,9 +11,10 @@ class Profile(models.Model):
         upload_to='profile_pictures/', 
         default='default_profile_picture.png'
     )
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.user.username} Profile'
+        return f'{self.id}{self.user.username} Profile'
     
     def save(self, *args, **kwargs):
         self.email = self.user.email
