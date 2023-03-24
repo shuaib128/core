@@ -80,7 +80,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await sync_to_async(chat_context.add)(chat_message)
 
         # Send message to room group
-        serilizer = ChatMessageSerialzer(chat_message)
+        serilizer = await sync_to_async(ChatMessageSerialzer)(chat_message)
         await self.channel_layer.group_send(
             self.room_group_name, {
                 "type": "chat_message", 
