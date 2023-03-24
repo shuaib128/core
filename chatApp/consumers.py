@@ -66,7 +66,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         message = text_data_json["message"]
         user = text_data_json["user"]
-        print(f"{self.user_one}/{self.user_two}/")
 
         sender = await sync_to_async(get_object_or_404)(Profile, username=user["username"])
         # Make a chat message model

@@ -3,12 +3,6 @@
 import os
 import sys
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
-
-import django
-django.setup()
-
-from django.core.management import call_command
 
 def main():
     """Run administrative tasks."""
