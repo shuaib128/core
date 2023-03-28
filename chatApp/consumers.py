@@ -1,4 +1,5 @@
 import json
+from uuid import uuid4
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .models import ChatMessage, ChatRoom
 from asgiref.sync import sync_to_async
@@ -9,6 +10,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import InvalidToken
 from rest_framework_simplejwt.settings import api_settings
 from django.contrib.auth import get_user_model
+from chatApp.Utilities.imageKeys import imageKeys
+from .models import ChatImage
 
 
 """
@@ -63,6 +66,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     # Receive message from WebSocket
     async def receive(self, text_data):
+        radon_title = str(uuid4())
         text_data_json = json.loads(text_data)
         message = text_data_json["message"]
         user = text_data_json["user"]
@@ -73,6 +77,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
             sender=sender,
             content=message
         )
+
+        # Add images
+        if(text_data_json["image_length"] != 0):
+            image_keys = (imageKeys(
+                text_data_json, ChatImage, radon_title, user["username"]
+            ))
+            chatroom_context = await sync_to_async(lambda: chat_message.images)()
+            if image_keys:
+                for i in image_keys:
+                    print(i)
+                    await sync_to_async(chatroom_context.add)(i)
 
         #Add it to the chatroom
         chat_room = await sync_to_async(get_object_or_404)(ChatRoom, name=f"{self.user_one}/{self.user_two}")
