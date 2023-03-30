@@ -3,7 +3,18 @@ from rest_framework import serializers
 from .models import Profile
 
 
+class ProfileUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ('bio', 'profile_picture')
+
+class FriendsSerialzer(serializers.ModelSerializer):
+    class Meta:
+        fields = "__all__"
+        model = Profile
+
 class ProfileSerialzer(serializers.ModelSerializer):
+    chat_friend = FriendsSerialzer(many=True)
     class Meta:
         fields = "__all__"
         model = Profile

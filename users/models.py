@@ -12,6 +12,7 @@ class Profile(models.Model):
         default='default_profile_picture.png'
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    chat_friend = models.ManyToManyField('self', null=True, blank=True, symmetrical=False)
 
     def __str__(self):
         return f'{self.id}{self.user.username} Profile'

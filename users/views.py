@@ -1,6 +1,6 @@
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny
-from .serializers import UserSerializer
+from .serializers import UserSerializer, ProfileUpdateSerializer
 from django.contrib.auth.models import User
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -8,10 +8,15 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from django.contrib.auth import get_user_model
+import base64
+from io import BytesIO
 from django.shortcuts import get_object_or_404
 from .models import Profile
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from .serializers import ProfileSerialzer
+from django.core.files import File
+from rest_framework.exceptions import ParseError
+from django.core.files.base import ContentFile
 
 class UserCreateAPIView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -54,6 +59,29 @@ class UserView(APIView):
         return Response(serilizer.data)
     
 
+class ProfileUpdateAPIView(generics.UpdateAPIView):
+    queryset = Profile.objects.all()
+    serializer_class = ProfileUpdateSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user.profile
+    
+    def update(self, request, *args, **kwargs):
+        profile = self.get_object()
+
+        # Save the profile picture from the base64-encoded data
+        image_data = request.data.get('profile_picture', None)
+        if image_data is not None:
+            format, imgstr = image_data.split(';base64,') # assuming that imageData is in format "data:image/png;base64,iVBORw0KG..."
+            ext = format.split('/')[-1]
+            profile.profile_picture.save(f'{profile.id}_profile_picture.{ext}', ContentFile(base64.b64decode(imgstr)), save=False)
+            profile.save()
+
+        # Call the parent update() method to save the other fields
+        return super().update(request, *args, **kwargs)
+    
+
 class LogoutView(APIView):
     parser_classes = [MultiPartParser, FormParser, JSONParser]
     authentication_classes = [JWTAuthentication]
@@ -88,3 +116,20 @@ class SearchUserView(APIView):
 
         else:
             return Response("No user found")
+        
+class AddToFriendList(APIView):
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user_object = request.user
+        selected_user = request.data["selectedUser"]
+
+        user = get_object_or_404(Profile, username=user_object.username)
+        
+        user.chat_friend.add(selected_user["id"])
+        user.save()
+        serialized_data = ProfileSerialzer(user).data
+
+        return Response(serialized_data)
