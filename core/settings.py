@@ -20,7 +20,7 @@ ALLOWED_HOSTS = ["*"]
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    "https://sams-discord-clone.netlify.app",
+    "https://samschatclone.netlify.app",
 ]
 
 
