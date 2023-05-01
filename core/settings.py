@@ -76,6 +76,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'core.wsgi.application'
 # Daphne
 ASGI_APPLICATION = "core.asgi.application"
+
 # CHANNEL_LAYERS = {
 #     "default": {
 #         "BACKEND": "channels.layers.InMemoryChannelLayer"

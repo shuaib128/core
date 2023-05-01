@@ -1,10 +1,11 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from users.models import Profile
-from .models import ChatRoom
-from .serializers import CharroomSerialzer
+from .models import ChatRoom, ChatMessage
+from .serializers import CharroomSerialzer, ChatMessageSerialzer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.db.models import Q
 
 # Create your views here.
 class CreateRetriveChatroom(APIView):
@@ -30,3 +31,23 @@ class CreateRetriveChatroom(APIView):
             pass
 
         return Response("hey")
+    
+# Search Convertation
+class ChatMessageSearchView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        message = request.data.get("message", " ").strip()
+        chatRoom = request.data.get("chatroom")
+        print(chatRoom)
+
+        if not message:
+            return Response({'error': 'Search message cannot be empty'})
+
+        chatrooms = ChatRoom.objects.filter(name=chatRoom)
+        print(chatrooms)
+        messages = ChatMessage.objects.filter(content__contains=message, ChatContent__in=chatrooms)
+        serialized_messages = [ChatMessageSerialzer(m).data for m in messages]
+        return Response(serialized_messages)
+

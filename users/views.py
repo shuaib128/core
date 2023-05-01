@@ -9,13 +9,10 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from django.contrib.auth import get_user_model
 import base64
-from io import BytesIO
 from django.shortcuts import get_object_or_404
 from .models import Profile
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from .serializers import ProfileSerialzer
-from django.core.files import File
-from rest_framework.exceptions import ParseError
 from django.core.files.base import ContentFile
 
 class UserCreateAPIView(generics.CreateAPIView):
