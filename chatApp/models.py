@@ -6,6 +6,10 @@ class ChatImage(models.Model):
     name = models.CharField(max_length=10000, default="Image Name")
     image = models.ImageField(null=True, blank=True, upload_to="media/chatImages")
 
+class ChatVideo(models.Model):
+    name = models.CharField(max_length=10000, default="Video Name")
+    video = models.FileField(null=True, blank=True, upload_to="media/chatVideos")
+
 #ChatMessages Model
 class ChatMessage(models.Model):
     sender = models.ForeignKey(
@@ -15,6 +19,7 @@ class ChatMessage(models.Model):
     )
     content = models.TextField()
     images = models.ManyToManyField(ChatImage, related_name="Images", null=True, blank=True)
+    videos = models.ManyToManyField(ChatVideo, related_name="videos", null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
