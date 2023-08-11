@@ -31,6 +31,7 @@ def get_user_from_token(token):
         return user
     except:
         return None
+    
 class UserView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]

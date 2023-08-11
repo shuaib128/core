@@ -1,14 +1,33 @@
+import base64
 from django.db import models
 from users.models import Profile
+from django.core.files.base import ContentFile
 
 # Create your models here.
-class ChatImage(models.Model):
-    name = models.CharField(max_length=10000, default="Image Name")
-    image = models.ImageField(null=True, blank=True, upload_to="media/chatImages")
+class MediaFile(models.Model):
+    filename = models.CharField(max_length=255, default="")
+    file = models.FileField(upload_to='media/postsMedia', blank=True)
 
-class ChatVideo(models.Model):
-    name = models.CharField(max_length=10000, default="Video Name")
-    video = models.FileField(null=True, blank=True, upload_to="media/chatVideos")
+    #Append chunk method
+    def append_chunk(self, chunk_base64):
+        # Remove the "data:application/octet-stream;base64," prefix from the Base64 string
+        prefix = "data:application/octet-stream;base64,"
+        if chunk_base64.startswith(prefix):
+            chunk_base64 = chunk_base64[len(prefix):]
+
+        # decode the base64 string into bytes
+        chunk = base64.b64decode(chunk_base64)
+
+        if self.file:
+            self.file.close()
+            self.file.open(mode='ab') # append in binary mode
+        else:
+            self.file.save(self.filename, ContentFile(b''), save=False)  # Save an empty file
+            self.file.close()
+            self.file.open(mode='ab')
+        self.file.write(chunk)
+        self.file.close()
+        self.save()
 
 #ChatMessages Model
 class ChatMessage(models.Model):
@@ -18,8 +37,7 @@ class ChatMessage(models.Model):
         related_name='sent_messages'
     )
     content = models.TextField()
-    images = models.ManyToManyField(ChatImage, related_name="Images", null=True, blank=True)
-    videos = models.ManyToManyField(ChatVideo, related_name="videos", null=True, blank=True)
+    media_files = models.ManyToManyField(MediaFile, related_name='media', null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

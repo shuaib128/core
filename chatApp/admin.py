@@ -1,8 +1,7 @@
 from django.contrib import admin
-from .models import ChatRoom, ChatMessage, ChatImage, ChatVideo
+from .models import ChatRoom, ChatMessage, MediaFile
 
 # Register your models here.
 admin.site.register(ChatRoom)
-admin.site.register(ChatImage)
 admin.site.register(ChatMessage)
-admin.site.register(ChatVideo)
+admin.site.register(MediaFile)
