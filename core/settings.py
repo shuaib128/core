@@ -23,6 +23,8 @@ CORS_ALLOWED_ORIGINS = [
     "https://samschatclone.netlify.app",
 ]
 
+FCM_SERVER_KEY = os.getenv("FCM_SERVER_KEY")
+
 
 # Application definition
 
@@ -42,6 +44,7 @@ INSTALLED_APPS = [
     #Apps
     'users',
     'chatApp',
+    'videoCall'
 ]
 
 MIDDLEWARE = [

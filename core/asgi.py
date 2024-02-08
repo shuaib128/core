@@ -9,12 +9,18 @@ os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 django_asgi_app = get_asgi_application()
 
 import chatApp.routing
+import videoCall.routing
 
 application = ProtocolTypeRouter(
     {
         "http": django_asgi_app,
         "websocket": AllowedHostsOriginValidator(
-            AuthMiddlewareStack(URLRouter(chatApp.routing.websocket_urlpatterns))
+            AuthMiddlewareStack(
+                URLRouter(
+                    chatApp.routing.websocket_urlpatterns +
+                    videoCall.routing.websocket_urlpatterns
+                )
+            )
         ),
         "https": django_asgi_app,
     }

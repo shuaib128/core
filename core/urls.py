@@ -8,6 +8,7 @@ from django.views.static import serve
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/chat/', include('chatApp.urls')),
+    path('api/chat/call', include('videoCall.urls')),
     path('api/users/', include('users.urls')),
 ]
 
